@@ -1,6 +1,6 @@
 #' Clase R6 para conexión a MySQL vía túnel SSH
 #'
-#' @export
+#' @export 
 ConexionBD <- R6::R6Class(
   "ConexionBD",
 
