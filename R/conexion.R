@@ -10,7 +10,7 @@ ConexionBD <- R6::R6Class(
     find_free_port = function() {
       for (port in sample(49152L:65535L, 100L)) {
         ok <- tryCatch({
-          s <- socketConnection(port = port, server = TRUE, blocking = FALSE, timeout = 1)
+          s <- serverSocket(port)
           close(s)
           TRUE
         }, error = function(e) FALSE)
@@ -28,7 +28,7 @@ ConexionBD <- R6::R6Class(
           key <- trimws(substr(line, 1, idx - 1))
           val <- trimws(substr(line, idx + 1, nchar(line)))
           val <- gsub('^["\']|["\']$', "", val)
-          do.call(Sys.setenv, setNames(list(val), key))
+          if (nzchar(key)) do.call(Sys.setenv, setNames(list(val), key))
         }
       }
     }
