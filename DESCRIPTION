@@ -1,0 +1,18 @@
+Package: cdbase
+Type: Package
+Title: Conexion a Base de Datos MySQL via Tunel SSH
+Version: 0.1.0
+Authors@R: person("Claudio", "Daniel", email = "claudiodanielpc@gmail.com",
+    role = c("aut", "cre"))
+Description: Clase R6 para establecer conexiones a bases de datos MySQL
+    a traves de tuneles SSH con autenticacion por llave PEM, equivalente
+    a la libreria Python cd_base.
+License: MIT + file LICENSE
+Encoding: UTF-8
+RoxygenNote: 7.3.2
+Imports:
+    R6,
+    DBI,
+    RMariaDB,
+    callr,
+    ssh
