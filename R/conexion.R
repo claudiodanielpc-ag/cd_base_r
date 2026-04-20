@@ -8,7 +8,20 @@ ConexionBD <- R6::R6Class(
     bg_tunnel = NULL,
 
     find_free_port = function() {
-      for (port in sample(49152L:65535L, 100L)) {
+      if (.Platform$OS.type == "windows") {
+        tryCatch({
+          out <- suppressWarnings(
+            system2("netstat", "-ano", stdout = TRUE, stderr = FALSE)
+          )
+          used <- unique(as.integer(
+            unlist(regmatches(out, gregexpr("(?<=:)\\d+(?=\\s)", out, perl = TRUE)))
+          ))
+          used <- used[!is.na(used) & used > 0L]
+          candidates <- setdiff(32768L:49151L, used)
+          if (length(candidates) > 0L) return(sample(candidates, 1L))
+        }, error = function(e) NULL)
+      }
+      for (port in sample(32768L:49151L, 150L)) {
         ok <- tryCatch({
           s <- serverSocket(port)
           close(s)
