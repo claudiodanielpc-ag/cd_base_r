@@ -8,19 +8,6 @@ ConexionBD <- R6::R6Class(
     bg_tunnel = NULL,
 
     find_free_port = function() {
-      if (.Platform$OS.type == "windows") {
-        tryCatch({
-          out <- suppressWarnings(
-            system2("netstat", "-ano", stdout = TRUE, stderr = FALSE)
-          )
-          used <- unique(as.integer(
-            unlist(regmatches(out, gregexpr("(?<=:)\\d+(?=\\s)", out, perl = TRUE)))
-          ))
-          used <- used[!is.na(used) & used > 0L]
-          candidates <- setdiff(32768L:49151L, used)
-          if (length(candidates) > 0L) return(sample(candidates, 1L))
-        }, error = function(e) NULL)
-      }
       for (port in sample(32768L:49151L, 150L)) {
         ok <- tryCatch({
           s <- serverSocket(port)
@@ -29,6 +16,17 @@ ConexionBD <- R6::R6Class(
         }, error = function(e) FALSE)
         if (ok) return(port)
       }
+      tryCatch({
+        cmd  <- if (.Platform$OS.type == "windows") "netstat" else "ss"
+        args <- if (.Platform$OS.type == "windows") "-ano" else "-tln"
+        out  <- suppressWarnings(system2(cmd, args, stdout = TRUE, stderr = FALSE))
+        used <- unique(as.integer(
+          unlist(regmatches(out, gregexpr("(?<=:)\\d+(?=\\s|$)", out, perl = TRUE)))
+        ))
+        used <- used[!is.na(used) & used > 0L]
+        candidates <- setdiff(32768L:49151L, used)
+        if (length(candidates) > 0L) return(sample(candidates, 1L))
+      }, error = function(e) NULL)
       stop("No se encontró un puerto libre")
     },
 
